@@ -1,0 +1,48 @@
+db.articles.aggregate([
+    {$project: {"_id":0, "tags":1} },
+    {$unwind: "$tags"},
+    {$group: {_id:"$tags"} },
+    {$sort: {_id:1} }
+])
+
+db.articles.aggregate([
+    {$project: {"_id":0, "title":1, "description":1, "link":1, "date":1} },
+    {$group: {
+            _id: "$date.year", 
+            articles: { 
+                $push: {
+                    date: "$date",
+                    title: "$title",
+                    description: "$description",
+                    link: "$link",
+                }
+            } 
+        } 
+    },
+    {$sort: {"_id.year":-1} }
+])
+
+db.articles.find({}).sort({"date.year":-1, "date.month":-1})
+
+db.articles.find({ tags: "tag5" }).sort({"date.year":-1, "date.month":-1})
+
+
+ this.find( 
+        { tags: tag },
+        null,
+        {
+            sort:{
+                "date.year":-1, 
+                "date.month":-1
+            }
+        },
+        function(err, articles){
+            if(err){
+                var my_err = {};
+                my_err.message = "Error al buscar el article";
+                callback(my_err);
+            }
+            else{
+                callback(null, articles); //ok
+            }
+        });
